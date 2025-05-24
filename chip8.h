@@ -10,7 +10,7 @@
 #define NUM_REGS 16
 #define KEYPAD_SIZE 16
 
-struct Chip8 {
+typedef struct Chip8 {
     uint8_t memory[MEM];                              // Memory array, size 4096 bytes
     uint8_t V[NUM_REGS];                              // 16 registers
     unsigned short I;                                 // Index register
@@ -22,6 +22,6 @@ struct Chip8 {
     uint8_t display[DISPLAY_WIDTH * DISPLAY_HEIGHT];  // Display
     uint8_t keypad[KEYPAD_SIZE];                      // Keypad 16 keys
     unsigned short opcode;                            // stores opcode value
-};
+} Chip8;
 
-void decode_opcode(struct Chip8* chip8, unsigned short opcode);
+#endif

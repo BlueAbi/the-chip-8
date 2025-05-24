@@ -1,6 +1,12 @@
+#include <time.h>
+#include <SDL3/SDL.h>
+#include <stdbool.h>
 #include "chip8.h"
 
-chip8 myChip8;
+#define CYCLES_PER_SECOND
+#define TIMER_HZ 60
+
+Chip8 myChip8;
 
 void setupGraphics();
 void setupInput();
