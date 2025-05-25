@@ -39,11 +39,9 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
         break;
 
     case 0x5000: // 0x5XY0
-        // skips next instruction if VX equals VY
-        if ((opcode & 0x000F) == 0x0000) {
-            if (chip8 -> V[((opcode & 0x0F00) >> 8)] == chip8 -> V[((opcode & 0x00F0) >> 4)]) {
-                chip8 -> pc += 2;
-            }
+        // Skips next instruction if VX equals VY
+        if (chip8->V[((opcode & 0x0F00) >> 8)] == chip8->V[((opcode & 0x00F0) >> 4)]) {
+            chip8->pc += 2;  // Skip next instruction
         }
         break;
 
@@ -88,27 +86,41 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
             break;
 
         case 0x0005:
-            // Vx -= Vy
+            // Vx -= Vy, set V[F] to 1 if there was no borrow, 0 if there was a borrow
+            if (chip8 -> V[(opcode & 0x0F00) >> 8] > chip8 -> V[(opcode & 0x00F0) >> 4]) {
+                chip8 -> V[0x000F] = 1;  // No borrow
+            } else {
+                chip8 -> V[0x000F] = 0;  // Borrow occurred
+            }
             chip8 -> V[(opcode & 0x0F00) >> 8] -= chip8 -> V[(opcode & 0x00F0) >> 4];
             break;
 
         case 0x0006:
-            // Shifts VX to the right by 1, then stores the least significant bit of VX prior to the shift into VF
+            // Shifts VX to the right by 1, stores the least significant bit (LSB) of VX prior to the shift into VF
             // Vx >>= 1
-            chip8 -> V[(opcode & 0x0F00) >> 8] >>= 1;
+            chip8 -> V[0x000F] = chip8 -> V[(opcode & 0x0F00) >> 8] & 0x01;  // Extract LSB of VX and store it in VF
+            chip8 -> V[(opcode & 0x0F00) >> 8] >>= 1;  // Shift VX to the right
             break;
 
         case 0x0007:
             // Vx = Vy - Vx
-            // VF is set to 0 when there's an underflow, and 1 when there is not
-            chip8 -> V[(opcode & 0x0F00) >> 8] |= chip8 -> V[(opcode & 0x00F0) >> 4] - chip8 -> V[(opcode & 0x0F00) >> 8];
+            // VF is set to 1 if Vy >= Vx, 0 if Vy < Vx (underflow)
+            if (chip8 -> V[(opcode & 0x00F0) >> 4] >= chip8 -> V[(opcode & 0x0F00) >> 8]) {
+                chip8 -> V[0x000F] = 1;  // No underflow
+            } else {
+                chip8 -> V[0x000F] = 0;  // Underflow
+            }
+            chip8 -> V[(opcode & 0x0F00) >> 8] = chip8 -> V[(opcode & 0x00F0) >> 4] - chip8 -> V[(opcode & 0x0F00) >> 8];
             break;
 
         case 0x000E:
-            // Shifts VX to the left by 1, then sets VF to 1 if the most significant bit of VX prior to that shift was set, or to 0 if it was unset
+            // Shifts VX to the left by 1, then stores the MSB of VX into VF
             // Vx <<= 1
-            chip8 -> V[(opcode & 0x0F00) >> 8] <<= 1;
-                break;
+            // Check if the most significant bit (MSB) of VX is set before the shift
+            chip8 -> V[0x000F] = (chip8 -> V[(opcode & 0x0F00) >> 8] & 0x0080) >> 7;  // MSB of VX before shift
+            chip8 -> V[(opcode & 0x0F00) >> 8] <<= 1;  // Perform the left shift on VX
+            break;
+
         }
         break;
 
