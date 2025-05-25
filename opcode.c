@@ -19,7 +19,9 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
 
     case 0x2000:
         // calls subroutine at 0x2NNN
-        chip8 -> stack[chip8 -> sp] = chip8 -> pc + 2;
+        chip8 -> stack[chip8 -> sp] = chip8 -> pc;
+        chip8 -> sp++;
+        chip8 -> pc = opcode & 0x0FFF;
         break;
 
     case 0x3000: // 0x3XNN
@@ -80,7 +82,9 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
 
         case 0x0004:
             // adds Vy to Vx, Vx += Vy
-            chip8 -> V[(opcode & 0x0F00) >> 8] += chip8 -> V[(opcode & 0x00F0) >> 4];
+            uint16_t sum = chip8 -> V[(opcode & 0x0F00) >> 8] + chip8 -> V[(opcode & 0x00F0) >> 4];
+            chip8 -> V[0x000F] = sum > 0x00FF;
+            chip8 -> V[(opcode & 0x0F00) >> 8] = sum & 0x00FF;
             break;
 
         case 0x0005:
