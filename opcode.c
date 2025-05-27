@@ -1,5 +1,6 @@
 #include "opcode.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
     switch (opcode & 0xF000) {
@@ -144,7 +145,7 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
     case 0xC000: // 0xCXNN
         // sets VX to the result of a bitwise AND operation on a random number (Typically: 0 to 255) and NN
         // Vx = rand() & NN
-        //chip8 -> V[(opcode & 0x0F00) >> 8] =
+        chip8 -> V[(opcode & 0x0F00) >> 8] = (rand() % 256) & (opcode & 0x0F00); // ensures value is between 0x00 and 0xFF
         break;
 
     case 0xD000: // 0xDXYN

@@ -17,18 +17,19 @@ int main(int argc, char **argv) {
     // setupGraphics();
     // setupInput();
 
-    // initialize system and load game int memory
-    myChip8.initialize();
+    // initialize system and load game into memory
+    chip8_initialize(&myChip8);
     myChip8.loadGame();
 
     // emulation loop
     for (;;) {
         // emulate one cycle
-        myChip8.emulateCycle();
+        emulateCycle(&myChip8);
 
         // if draw flag set, update the screen
         if (myChip8.drawFlag) {
-            drawGraphics();
+            drawGraphics(&myChip8); // Pass chip8 to drawGraphics
+            myChip8.drawFlag = false; // Reset drawFlag after drawing
         }
 
         // Store key press state (press and release)

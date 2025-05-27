@@ -12,6 +12,8 @@ add_executable(
     main.c
     chip8.c
     opcode.c
+    chip8.h
+    opcode.h
 )
 
 # Link the SDL3 library
