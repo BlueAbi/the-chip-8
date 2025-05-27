@@ -2,7 +2,6 @@
 #include "opcode.h"
 #include <string.h> // used for memset
 #include <time.h>
-#include <stdlib.h>
 
 void chip8_initialize(struct Chip8* chip8) {
 
@@ -73,12 +72,58 @@ void updateTimers(struct Chip8* chip8) {
 
 }
 
-void setupGraphics() {
+void setKeys(struct Chip8* chip8) {
+    SDL_PumpEvents();
+    const uint8_t* keystates = SDL_GetKeyboardState(NULL);
 
+    // Map SDL keycodes to Chip-8 keypad
+    chip8 -> keypad[0x0] = keystates[SDL_SCANCODE_X];
+    chip8 -> keypad[0x1] = keystates[SDL_SCANCODE_1];
+    chip8 -> keypad[0x2] = keystates[SDL_SCANCODE_2];
+    chip8 -> keypad[0x3] = keystates[SDL_SCANCODE_3];
+    chip8 -> keypad[0x4] = keystates[SDL_SCANCODE_Q];
+    chip8 -> keypad[0x5] = keystates[SDL_SCANCODE_W];
+    chip8 -> keypad[0x6] = keystates[SDL_SCANCODE_E];
+    chip8 -> keypad[0x7] = keystates[SDL_SCANCODE_A];
+    chip8 -> keypad[0x8] = keystates[SDL_SCANCODE_S];
+    chip8 -> keypad[0x9] = keystates[SDL_SCANCODE_D];
+    chip8 -> keypad[0xA] = keystates[SDL_SCANCODE_Z];
+    chip8 -> keypad[0xB] = keystates[SDL_SCANCODE_C];
+    chip8 -> keypad[0xC] = keystates[SDL_SCANCODE_4];
+    chip8 -> keypad[0xD] = keystates[SDL_SCANCODE_R];
+    chip8 -> keypad[0xE] = keystates[SDL_SCANCODE_F];
+    chip8 -> keypad[0xF] = keystates[SDL_SCANCODE_V];
 }
 
-void setupInput() {
+void setupGraphics(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture) {
+    // Window setup
+    window = SDL_CreateWindow("THE CHIP-8 EMULATOR",
+                              DISPLAY_WIDTH * 10,
+                              DISPLAY_HEIGHT * 10,
+                              SDL_WINDOW_HIDDEN);
+    if (!window) {
+        fprintf(stderr, "Failed to create: %s\n", SDL_GetError());
+        exit(1);
+    }
 
+    // Renderer setup
+    renderer = SDL_CreateRenderer(window,
+                                  NULL);
+    if (!renderer) {
+        fprintf(stderr, "Failed to create renderer: %s\n", SDL_GetError());
+        exit(1);
+    }
+
+    // Texture setup for the screen
+    texture = SDL_CreateTexture(renderer,
+                                SDL_PIXELFORMAT_RGB24,
+                                SDL_TEXTUREACCESS_STREAMING,
+                                DISPLAY_WIDTH,
+                                DISPLAY_HEIGHT);
+    if (!texture) {
+        fprintf(stderr, "Failed to create texture: %s\n", SDL_GetError());
+        exit(1);
+    }
 }
 
 void drawGraphics(struct Chip8* chip8, unsigned short opcode) {

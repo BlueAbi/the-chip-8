@@ -1,21 +1,22 @@
-#include <time.h>
-#include <SDL3/SDL.h>
-#include <stdbool.h>
 #include "chip8.h"
 
 #define CYCLES_PER_SECOND
 #define TIMER_HZ 60
 
 Chip8 myChip8;
-
-void setupGraphics();
-void setupInput();
-void drawGraphics();
+SDL_Window* window = NULL;
+SDL_Renderer* renderer = NULL;
+SDL_Texture* texture = NULL;
 
 int main(int argc, char **argv) {
-    // Set up render system and input
-    // setupGraphics();
-    // setupInput();
+    // Set up render system and input with SDL. Initialize SDL's event handling system
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) {
+        // Outputs error if SDL fails to Initialize
+        fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
+        exit(1); // Exit program
+    }
+
+    setupGraphics(window, renderer, texture);
 
     // initialize system and load game into memory
     chip8_initialize(&myChip8);
@@ -33,7 +34,12 @@ int main(int argc, char **argv) {
         }
 
         // Store key press state (press and release)
-        myChip8.setKeys();
+        setKeys(&myChip8);
     }
+    // Clean up SDL resources and exit
+    SDL_DestroyTexture(texture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();  // Quit SDL subsystems
     return 0;
 }

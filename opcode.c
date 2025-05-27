@@ -154,13 +154,15 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
         break;
 
     case 0xE000: // two cases, 0xEX9E and 0xEXA1
-        if ((opcode & 0x00FF) == 0x009E) {
-            // skips next instruction if the key stored in VX(only consider the lowest nibble) is pressed
-            // if (key() == Vx)
-            } else if ((opcode & 0x00FF) == 0x00A1) {
-            // Skips the next instruction if the key stored in VX(only consider the lowest nibble) is not pressed
-            // if (key() != Vx)
+        switch(opcode & 0x00FF)
+        {
+        // EX9E: Skips the next instruction
+        // if the key stored in VX is pressed
+        case 0x009E:
+            if (chip8 -> keypad[chip8 -> V[(opcode & 0x0F00) >> 8]] != 0) {
+                chip8 -> pc += 2; // skip next instruction
             }
+            break;
         break;
 
     case 0xF000: // 0xFXNN
