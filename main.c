@@ -1,8 +1,5 @@
 #include "chip8.h"
 
-#define CYCLES_PER_SECOND
-#define TIMER_HZ 60
-
 Chip8 myChip8;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
@@ -10,7 +7,7 @@ SDL_Texture* texture = NULL;
 
 int main(int argc, char **argv) {
     // Set up render system and input with SDL. Initialize SDL's event handling system
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
         // Outputs error if SDL fails to Initialize
         fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
         exit(1); // Exit program
@@ -20,7 +17,7 @@ int main(int argc, char **argv) {
 
     // initialize system and load game into memory
     chip8_initialize(&myChip8);
-    myChip8.loadGame();
+    loadGame();
 
     // emulation loop
     for (;;) {

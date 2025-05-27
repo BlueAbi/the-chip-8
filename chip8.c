@@ -73,8 +73,8 @@ void updateTimers(struct Chip8* chip8) {
 }
 
 void setKeys(struct Chip8* chip8) {
-    SDL_PumpEvents();
-    const uint8_t* keystates = SDL_GetKeyboardState(NULL);
+    int numkeys;
+    const Uint8* keystates = SDL_GetKeyboardState(&numkeys);
 
     // Map SDL keycodes to Chip-8 keypad
     chip8 -> keypad[0x0] = keystates[SDL_SCANCODE_X];
@@ -126,7 +126,8 @@ void setupGraphics(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* text
     }
 }
 
-void drawGraphics(struct Chip8* chip8, unsigned short opcode) {
+void drawGraphics(struct Chip8* chip8) {
+    unsigned short opcode = (chip8 -> memory[chip8 -> pc] << 8) | chip8 -> memory[chip8 -> pc + 1]; // grabs the opcode
     unsigned short x = chip8 -> V[(opcode & 0x0F00) >> 8];
     unsigned short y = chip8 -> V[(opcode & 0x00F0) >> 4];
     unsigned short height = opcode & 0x000F;

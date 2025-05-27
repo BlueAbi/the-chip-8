@@ -8,6 +8,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_keyboard.h>
 
 #define MEM 4096
 #define DISPLAY_WIDTH 64
@@ -36,7 +37,7 @@ void emulateCycle(struct Chip8* chip8);
 void setupInput();
 void setKeys(struct Chip8* chip8);
 void setupGraphics(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture);
-void drawGraphics(struct Chip8* chip8, unsigned short opcode);
+void drawGraphics(struct Chip8* chip8);
 void loadGame();
 
 
