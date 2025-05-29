@@ -7,6 +7,11 @@ int main(int argc, char **argv) {
     SDL_Renderer* renderer = NULL;
     SDL_Texture* texture = NULL;
 
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <CHIP-8 ROM>\n", argv[0]);
+        return 1;
+    }
+
     // Set up render system and input with SDL. Initialize SDL's event handling system
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
         // Outputs error if SDL fails to Initialize
@@ -18,7 +23,7 @@ int main(int argc, char **argv) {
 
     // initialize system and load game into memory
     chip8_initialize(&myChip8);
-    loadGame();
+    loadGame(argv[1], &myChip8);
 
     // emulation loop
     for (;;) {
