@@ -13,17 +13,25 @@ int main(int argc, char **argv) {
     }
 
     // Set up render system and input with SDL. Initialize SDL's event handling system
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
-        // Outputs error if SDL fails to Initialize
+    printf("Initializing SDL...\n");
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
         fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
-        exit(1); // Exit program
+        exit(1);
     }
+
+    printf("SDL initialized successfully.\n");
 
     setupGraphics(window, renderer, texture);
 
     // initialize system and load game into memory
+    printf("Initializing CHIP-8...\n");
     chip8_initialize(&myChip8);
+    printf("CHIP-8 initialized.\n");
+
+    // Load the game ROM
+    printf("Loading ROM: %s\n", argv[1]);
     loadGame(argv[1], &myChip8);
+    printf("ROM loaded successfully.\n");
 
     // emulation loop
     for (;;) {
