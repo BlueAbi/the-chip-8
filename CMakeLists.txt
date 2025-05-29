@@ -37,3 +37,9 @@ install(TARGETS the-chip-8
 # Optionally set the CMake module path to find the correct SDL3 package
 # This can be useful if the submodule wasn't added correctly or you're working with other SDL versions
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendored/SDL")
+
+find_package(ALSA REQUIRED)
+if (NOT ALSA_FOUND)
+    message(FATAL_ERROR "ALSA development library not found. Please install libasound2-dev or alsa-lib-devel.")
+endif()
+
