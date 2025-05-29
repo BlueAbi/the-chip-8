@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 # Define project
 project(the-chip-8 LANGUAGES C)
 
-# Add the SDL3 library as subdirectory
+# Add the SDL3 library as subdirectory (ensure SDL3 is located under 'vendored/SDL')
 add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
 
 # Create executable target
@@ -33,3 +33,7 @@ install(TARGETS the-chip-8
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+# Optionally set the CMake module path to find the correct SDL3 package
+# This can be useful if the submodule wasn't added correctly or you're working with other SDL versions
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vendored/SDL")
