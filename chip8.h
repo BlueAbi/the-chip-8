@@ -38,7 +38,7 @@ void setupInput();
 void setKeys(struct Chip8* chip8);
 void setupGraphics(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture);
 void drawGraphics(struct Chip8* chip8);
-void loadGame();
+void loadGame(const char *filename, struct Chip8* chip8);
 
 
 #endif

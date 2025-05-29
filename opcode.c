@@ -1,6 +1,7 @@
 #include "opcode.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
     switch (opcode & 0xF000) {
@@ -131,7 +132,7 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
 
     case 0x9000: // 0x9XY0
         // skips next instruction is VX does not equal VY
-        if ((opcode & 0x0F00) != (opcode & 0x00F0)) {
+        if (chip8 -> V[(opcode & 0x0F00) >> 8] != chip8 -> V[(opcode & 0x00F0) >> 4]) {
             chip8 -> pc += 2;
         }
         break;
@@ -149,26 +150,33 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
     case 0xC000: // 0xCXNN
         // sets VX to the result of a bitwise AND operation on a random number (Typically: 0 to 255) and NN
         // Vx = rand() & NN
-        chip8 -> V[(opcode & 0x0F00) >> 8] = (uint8_t)(rand() % 256) & (uint8_t)((opcode & 0x0F00) >> 8);
+        chip8->V[(opcode & 0x0F00) >> 8] = (uint8_t)(rand() % 256) & (opcode & 0x00FF);
         // ensures value is between 0x00 and 0xFF
         break;
 
     case 0xD000: // 0xDXYN
-        // draws a sprite at coordinate (VX, VY) with a width of 8 pixel and heigh N pixels
-        // draw(Vx, Vy, N)
-        chip8 -> display[]
+        drawSprite(chip8,                                  // Pointer to chip8 machine state
+                   chip8 -> V[(opcode & 0x0F00) >> 8],     // Sprite x coordinate from Vx
+                   chip8 -> V[(opcode & 0x00F0) >> 4],     // Sprite y coordinate from Vy
+                   opcode & 0x000F);                       // Sprite is N pixels tall (automatically 8 pixels wide)
         break;
 
     case 0xE000: // two cases, 0xEX9E and 0xEXA1
-        switch(opcode & 0x00FF)
-        {
-        // EX9E: Skips the next instruction
-        // if the key stored in VX is pressed
-        case 0x009E:
-            if (chip8 -> keypad[chip8 -> V[(opcode & 0x0F00) >> 8]] != 0) {
-                chip8 -> pc += 2; // skip next instruction
-            }
-            break;
+        switch(opcode & 0x00FF) {
+            // EX9E: Skips the next instruction if the key stored in VX is pressed
+            case 0x009E:
+                if (chip8->keypad[chip8->V[(opcode & 0x0F00) >> 8]] != 0) {
+                    chip8->pc += 2; // Skip next instruction if key stored in Vx is pressed
+                }
+                break;
+
+                // EXA1: Skips the next instruction if the key stored in VX is not pressed
+            case 0x00A1:
+                if (chip8->keypad[chip8->V[(opcode & 0x0F00) >> 8]] == 0) {
+                    chip8->pc += 2; // Skip next instruction if key stored in Vx is not pressed
+                }
+                break;
+        }
         break;
 
     case 0xF000: // 0xFXNN
@@ -179,7 +187,20 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
             break;
 
         case 0x000A:
-            // sets Vx to keypress
+            // sets Vx to keypress, and execution is halted until a key is pressed
+            bool key_pressed = false;
+            uint8_t x = (opcode & 0x0F00) >> 8;
+
+            for (int i = 0; i < KEYPAD_SIZE; i++) {
+                if (chip8->keypad[i]) {
+                    chip8->V[x] = i;
+                    key_pressed = true;
+                    break;
+                }
+            }
+
+            if (!key_pressed)
+                return; // Halt execution until key press
             break;
 
         case 0x0015:
@@ -199,21 +220,49 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
 
         case 0x0029:
             // sets I to the location of the sprite for the character in Vx, characters 0-F in 4x4 font
-            // I = sprite_addr[Vx]
+            unsigned short spriteAddr[16] = {
+                0x050, // Address for sprite of character 0
+                0x055, // Address for sprite of character 1
+                0x05A, // Address for sprite of character 2
+                0x05F, // Address for sprite of character 3
+                0x064, // Address for sprite of character 4
+                0x069, // Address for sprite of character 5
+                0x06E, // Address for sprite of character 6
+                0x073, // Address for sprite of character 7
+                0x078, // Address for sprite of character 8
+                0x07D, // Address for sprite of character 9
+                0x082, // Address for sprite of character A
+                0x087, // Address for sprite of character B
+                0x08C, // Address for sprite of character C
+                0x091, // Address for sprite of character D
+                0x096, // Address for sprite of character E
+                0x09B  // Address for sprite of character F
+            };
+
+            chip8 -> I = spriteAddr[chip8 -> V[(opcode & 0x0F00) >> 8]];
             break;
 
         case 0x0033:
             // Stores the binary-coded decimal representation of VX, with the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2
+            chip8 -> memory[chip8 -> I] = chip8 -> V[(opcode & 0x0F00) >> 8] / 100;
+            chip8 -> memory[chip8 -> I + 1] = (chip8 -> V[(opcode & 0x0F00) >> 8] / 10) % 10;
+            chip8 -> memory[chip8 -> I + 2] = chip8 -> V[(opcode & 0x0F00) >> 8] % 10;
             break;
 
         case 0x0055:
             // Stores from V0 to VX (including VX) in memory, starting at address I
             // The offset from I is increased by 1 for each value written, but I itself is left unmodified
+            for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
+                chip8 -> memory[chip8 -> I + i] = chip8 -> V[i];
+            }
             break;
 
         case 0x0065:
             // Fills from V0 to VX (including VX) with values from memory, starting at address I
             // The offset from I is increased by 1 for each value read, but I itself is left unmodified
+            for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
+                chip8 -> V[i] = chip8 -> memory[chip8 -> I + i];
+            }
             break;
         }
 
@@ -224,8 +273,27 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
         break;
         }
     }
-}
 
 void drawSprite(struct Chip8* chip8, uint8_t x, uint8_t y, uint8_t height) {
-    chip8 -> V[0xF] = 0; // Reset collision flag
+    chip8->V[0xF] = 0; // Reset collision flag
+
+    for (int row = 0; row < height; row++) {
+        uint8_t spriteByte = chip8->memory[chip8->I + row];
+
+        for (int col = 0; col < 8; col++) {
+            uint8_t spritePixel = spriteByte & (0x80 >> col);  // Extract pixel
+            int xCoord = (x + col) % DISPLAY_WIDTH;           // Wrap around if needed
+            int yCoord = (y + row) % DISPLAY_HEIGHT;          // Wrap around if needed
+            int index = xCoord + (yCoord * DISPLAY_WIDTH);
+
+            if (spritePixel) {
+                if (chip8->display[index] == 1) {
+                    chip8->V[0xF] = 1; // Collision detected
+                }
+                chip8->display[index] ^= 1; // XOR to flip the pixel
+            }
+        }
+    }
+
+    chip8->drawFlag = true; // Set the draw flag to true after drawing
 }
