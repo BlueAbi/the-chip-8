@@ -74,7 +74,7 @@ void updateTimers(struct Chip8* chip8) {
 
 void setKeys(struct Chip8* chip8) {
     int numkeys;
-    const Uint8* keystates = SDL_GetKeyboardState(&numkeys);
+    const bool* keystates = SDL_GetKeyboardState(&numkeys);
 
     // Map SDL keycodes to Chip-8 keypad
     chip8 -> keypad[0x0] = keystates[SDL_SCANCODE_X];
@@ -146,4 +146,15 @@ void drawGraphics(struct Chip8* chip8) {
         }
     }
     chip8 -> drawFlag = true; // Set flag to refresh screen
+}
+
+void loadGame(const char *filename, struct Chip8* chip8) {
+    FILE *game = fopen(filename, "rb");
+    if (game == NULL) {
+        fprintf(stderr, "Failed to open ROM: %s\n", filename);
+        exit(1);
+    }
+    // Load ROM into game memory at 0x200
+    fread(&chip8 -> memory[0x200], 1, MEM - 0x200, game);
+    fclose(game);
 }
