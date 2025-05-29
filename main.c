@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 
     printf("SDL initialized successfully.\n");
 
-    setupGraphics(window, renderer, texture);
+    setupGraphics(&window, &renderer, &texture);
 
     // initialize system and load game into memory
     printf("Initializing CHIP-8...\n");
@@ -36,12 +36,15 @@ int main(int argc, char **argv) {
     // emulation loop
     for (;;) {
         // emulate one cycle
+        //printf("Begin cycle");
         emulateCycle(&myChip8);
 
         // if draw flag set, update the screen
         if (myChip8.drawFlag) {
             drawGraphics(&myChip8); // Pass chip8 to drawGraphics
+            printf("Drawing again");
             myChip8.drawFlag = false; // Reset drawFlag after drawing
+            printf("clearing drawFlag");
         }
 
         // Store key press state (press and release)

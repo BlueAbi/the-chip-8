@@ -95,32 +95,32 @@ void setKeys(struct Chip8* chip8) {
     chip8 -> keypad[0xF] = keystates[SDL_SCANCODE_V];
 }
 
-void setupGraphics(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture) {
+void setupGraphics(SDL_Window** window, SDL_Renderer** renderer, SDL_Texture** texture) {
     // Window setup
-    window = SDL_CreateWindow("THE CHIP-8 EMULATOR",
+    *window = SDL_CreateWindow("THE CHIP-8 EMULATOR",
                               DISPLAY_WIDTH * 10,
                               DISPLAY_HEIGHT * 10,
                               SDL_WINDOW_HIDDEN);
-    if (!window) {
+    if (!*window) {
         fprintf(stderr, "Failed to create: %s\n", SDL_GetError());
         exit(1);
     }
 
     // Renderer setup
-    renderer = SDL_CreateRenderer(window,
+    *renderer = SDL_CreateRenderer(*window,
                                   NULL);
-    if (!renderer) {
+    if (!*renderer) {
         fprintf(stderr, "Failed to create renderer: %s\n", SDL_GetError());
         exit(1);
     }
 
     // Texture setup for the screen
-    texture = SDL_CreateTexture(renderer,
+    *texture = SDL_CreateTexture(*renderer,
                                 SDL_PIXELFORMAT_RGB24,
                                 SDL_TEXTUREACCESS_STREAMING,
                                 DISPLAY_WIDTH,
                                 DISPLAY_HEIGHT);
-    if (!texture) {
+    if (!*texture) {
         fprintf(stderr, "Failed to create texture: %s\n", SDL_GetError());
         exit(1);
     }
