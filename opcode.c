@@ -8,8 +8,12 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
         // Calls machine code routine (RCA 1802 for COSMAC VIP) at address NNN. Not necessary for most ROMs
         if (opcode == 0x00E0) {
             // clear the screen
+            memset(chip8 -> display, 0, DISPLAY_WIDTH * DISPLAY_HEIGHT);
+            chip8 -> drawFlag = true;
         } else if (opcode == 0x00EE) {
             // return from a subroutine
+            chip8 -> sp -= 1;
+            chip8 -> pc = chip8 -> stack[chip8 -> sp];
         }
         break;
 
@@ -152,6 +156,7 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
     case 0xD000: // 0xDXYN
         // draws a sprite at coordinate (VX, VY) with a width of 8 pixel and heigh N pixels
         // draw(Vx, Vy, N)
+        chip8 -> display[]
         break;
 
     case 0xE000: // two cases, 0xEX9E and 0xEXA1
@@ -219,4 +224,8 @@ void decodeOpcode(struct Chip8* chip8, unsigned short opcode) {
         break;
         }
     }
+}
+
+void drawSprite(struct Chip8* chip8, uint8_t x, uint8_t y, uint8_t height) {
+    chip8 -> V[0xF] = 0; // Reset collision flag
 }
