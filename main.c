@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
     printf("SDL initialized successfully.\n");
 
     setupGraphics(&window, &renderer, &texture);
+    printf("Using video driver: %s\n", SDL_GetCurrentVideoDriver());
 
     // initialize system and load game into memory
     printf("Initializing CHIP-8...\n");

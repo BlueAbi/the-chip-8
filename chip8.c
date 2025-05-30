@@ -100,7 +100,7 @@ void setupGraphics(SDL_Window** window, SDL_Renderer** renderer, SDL_Texture** t
     *window = SDL_CreateWindow("THE CHIP-8 EMULATOR",
                               DISPLAY_WIDTH * 10,
                               DISPLAY_HEIGHT * 10,
-                              SDL_WINDOW_HIDDEN);
+                              0);
     if (!*window) {
         fprintf(stderr, "Failed to create: %s\n", SDL_GetError());
         exit(1);
@@ -123,7 +123,7 @@ void setupGraphics(SDL_Window** window, SDL_Renderer** renderer, SDL_Texture** t
     if (!*texture) {
         fprintf(stderr, "Failed to create texture: %s\n", SDL_GetError());
         exit(1);
-    }
+    }   
 }
 
 void drawGraphics(struct Chip8* chip8) {
